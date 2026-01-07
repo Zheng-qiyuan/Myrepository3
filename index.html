@@ -147,41 +147,47 @@
         <script src="./resources/qgis2web.js"></script>
 
         <script>
-            (function () {
-                const box = document.getElementById('photonBox');
-                const input = document.getElementById('photonInput');
-                const results = document.getElementById('photonResults');
-
-                async function searchPhoton(q) {
-                    if (!q || q.trim().length < 3) {
-                        results.style.display = 'none'; results.innerHTML = '; return; }
-                        const url = 'https://photon.komoot.io/api/?q=$(encodeURIComponent(q))&limit=8';
-                        const resp = await fetch(url);
-                        const data = await.resp.json();
-                        const feats = (data && data.features) || [];
-                        results.style.display = feats.length ? 'block' : 'none';
-                        results.innerHTML = feats.map((f, i) =>
-                            '<div class="photon-item" style="padding:6px; border:1px solid #eee; cursor:pointer;">
-            $(f.properties.name || '(no name)')[] $(f.properties.city || f.properties.state || f.properties.country ||' </div>').join('');
-                        Array.from(results.querySelectorAll('./photon-item')).forEach((el, i) => {
-                            el.onclick = () => {
-                                const f = feats[i];
-                                if (window.map && window.ol) {
-                                    const [lon, lat] = f.geometry.coordinates; // Point or first coordinate
-                                    const coord = ol.proj.fromLonLat([lon, lat]);
-                                    map.getView().animate((center: coord, zoom: 14, duration: 300));
-                                }
-                                results.style.display = 'none';
-                            });
-                    });
-                }
-
-                let t = null;
-                input.addEventListener('input', () => {
-                    clearTimeout(t);
-                    t = setTimeout(() => searchPhoton(input.value), 250); // debounce
-                });
-            });
+             (function(){ 
+            const box = document.getElementById('photonBox'); 
+            const input = document.getElementById('photonInput'); 
+            const results = document.getElementById('photonResults'); 
+ 
+            async function searchPhoton(q) { 
+                if (!q || q.trim().length < 3) { results.style.display='none'; results.innerHTML=''; 
+return; } 
+                const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=8`; 
+GEOM2138/2151 – Cloud-based open-source GIS Solutions (2550) 
+17 
+ 
+                const resp = await fetch(url); 
+                const data = await resp.json(); 
+                const feats = (data && data.features) || []; 
+                results.style.display = feats.length ? 'block' : 'none'; 
+                results.innerHTML = feats.map((f,i) =>  
+                `<div class="photon-item" style="padding:6px; border:1px solid #eee; 
+cursor:pointer;"> 
+                    ${f.properties.name || '(no name)'} – ${f.properties.city || f.properties.state || 
+f.properties.country || ''} 
+                </div>`).join(''); 
+                Array.from(results.querySelectorAll('.photon-item')).forEach((el, i) => { 
+                el.onclick = () => { 
+                    const f = feats[i]; 
+                    if (window.map && window.ol) { 
+                    const [lon, lat] = f.geometry.coordinates; // Point or first coordinate 
+                    const coord = ol.proj.fromLonLat([lon, lat]); 
+                    map.getView().animate({center: coord, zoom: 14, duration: 300}); 
+                    } 
+                    results.style.display='none'; 
+                }; 
+                }); 
+            } 
+ 
+            let t=null; 
+            input.addEventListener('input', () => { 
+                clearTimeout(t); 
+                t = setTimeout(() => searchPhoton(input.value), 250); // debounce 
+            }); 
+            })();
         </script>
 
   
@@ -201,3 +207,4 @@
 
     </body>
 </html>
+
