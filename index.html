@@ -136,20 +136,22 @@
 
 
         <div id="opacity-control" style="
-        position: absolute; 
-        bottom: 40px; 
-        left: 10px; 
-        z-index: 1000; 
-        background: white; 
-        padding: 10px; 
-        border: 1px solid #ccc; 
-        border-radius: 5px;
-        font-family: Arial, sans-serif;
-        font-size: 14px;
-        box-shadow: 0 0 5px rgba(0,0,0,0.2);">
-    
-        <label>LST Layer Opacity:</label><br>
-        <input id="opacityRange" type="range" min="0" max="1" step="0.1" value="0.7" style="width: 150px;">
+            position: absolute; 
+            bottom: 50px; 
+            left: 10px; 
+            z-index: 1000; 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 12px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.3);">
+            
+            <label for="opacityRange" style="font-weight:bold; display:block; margin-bottom:5px;">
+                LST Layer Opacity
+            </label>
+            <input id="opacityRange" type="range" min="0" max="1" step="0.1" value="0.7" style="width: 160px; cursor:pointer;">
         </div>
          
         <script src="resources/qgis2web_expressions.js"></script>
@@ -210,43 +212,46 @@ f.properties.country || ''}
 
         </script>
 
-  
-
-        <div id="credits" style="position:absolute; bottom:5px; left:50%;
-
-     transform:translateX(-50%); background:#fff; padding:4px 8px;
-
-     font-size:12px; border:1px solid #ccc; z-index:1000;">
-
-            Map created by Shinjita Das (RMIT University) | Data: Landsat8 (USGS/NASA),
-
-            ABS 2021 Census | Basemap © OpenStreetMap contributors (CC-BY-SA) | Exported with QGIS/qgis2web
-
-        </div>
 
         <script>
-    // 监听滑块的拖动事件
-    var opacityInput = document.getElementById('opacityRange');
-    
-    opacityInput.addEventListener('input', function() {
-        var value = parseFloat(this.value);
-        
-        // 尝试设置透明度
-        if (typeof lyr_Melbourne_City_LST_1 !== 'undefined') {
-            lyr_Melbourne_City_LST_1.setOpacity(value);
-        }
-    });
+            // 当页面完全加载后执行
+            window.addEventListener('load', function() {
+                var opacityInput = document.getElementById('opacityRange');
+                
+                // 这里的变量名 lyr_Melbourne_City_LST_1 是基于 qgis2web 的命名规则推断的
+                // 对应你的文件名 layers/Melbourne_City_LST_1.js
+                var targetLayer = null;
 
-    // 初始化：页面加载时先设置一次默认透明度
-    window.addEventListener('load', function() {
-         if (typeof lyr_Melbourne_City_LST_1 !== 'undefined') {
-            lyr_Melbourne_City_LST_1.setOpacity(0.7); // 对应滑块的默认值
-         }
-    });
-</script>
+                // 检查变量是否存在
+                if (typeof lyr_Melbourne_City_LST_1 !== 'undefined') {
+                    targetLayer = lyr_Melbourne_City_LST_1;
+                    console.log("Success: LST layer found.");
+                } else {
+                    console.error("Error: Could not find layer variable 'lyr_Melbourne_City_LST_1'.");
+                }
+
+                if (targetLayer) {
+                    // 1. 初始化：根据滑块当前值设置透明度
+                    targetLayer.setOpacity(parseFloat(opacityInput.value));
+
+                    // 2. 监听：当滑块拖动时实时改变透明度
+                    opacityInput.addEventListener('input', function() {
+                        var val = parseFloat(this.value);
+                        targetLayer.setOpacity(val);
+                    });
+                }
+            });
+        </script>
+        <div id="credits" style="position:absolute; bottom:5px; left:50%;
+            transform:translateX(-50%); background:#fff; padding:4px 8px;
+            font-size:12px; border:1px solid #ccc; z-index:1000;">
+            Map created by Shinjita Das (RMIT University) | Data: Landsat8 (USGS/NASA),
+            ABS 2021 Census | Basemap © OpenStreetMap contributors (CC-BY-SA) | Exported with QGIS/qgis2web
+        </div>
 
     </body>
 </html>
+
 
 
 
