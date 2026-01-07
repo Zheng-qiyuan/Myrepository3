@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="./resources/ol.css">
+        <link rel="stylesheet" href="resources/fontawesome-all.min.css">
+        <link rel="stylesheet" type="text/css" href="resources/horsey.min.css">
+        <link rel="stylesheet" type="text/css" href="resources/ol-search-layer.min.css">
+        <link href="resources/photon-geocoder-autocomplete.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="./resources/ol-layerswitcher.css">
+        <link rel="stylesheet" href="./resources/qgis2web.css">
+        <style>
+        html, body {
+            background-color: #ffffff;
+        }
+        .ol-control > * {
+            background-color: #f8f8f8!important;
+            color: #444444!important;
+            border-radius: 0px;
+        }
+        .ol-attribution a, .gcd-gl-input::placeholder, .search-layer-input-search::placeholder {
+            color: #444444!important;
+        }
+        .search-layer-input-search {
+            background-color: #f8f8f8!important;
+        }
+        .ol-control > *:focus, .ol-control >*:hover {
+            background-color: rgba(248, 248, 248, 0.7)!important;
+        } 
+        .ol-control {
+            background-color: rgba(255,255,255,.4) !important;
+            padding: 2px !important;
+        } 
+        </style>
+
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title>Visualizing Land Surface Temperature (LST) Across Melbourne City</title>
+    </head>
+    <body>
+
+        <h2 style="position:absolute; top:10px; left:30%; transform:translateX(-50%);
+
+       background-color:white; padding:10px 15px; border:1px solid #ccc;
+
+       font-family: Arial, sans-serif; font-size:28px; font-weight:bold;
+
+       text-align:center; z-index:1000; display:flex; align-items:center; gap:10px;">
+
+
+
+            <!-- Logo image -->
+
+            <img src="images/logo.png" alt="University Logo" width="100" height="50">
+
+
+
+            <!-- Title text -->
+            Mapping Land Surface Temperature in Melbourne City
+
+        </h2>
+
+
+
+        <div id="objective" style="
+
+    position:absolute; top:240px; right:10px; width:220px;
+
+    background:#fff; padding:12px; border:1px solid #ccc;
+
+    font-family:Arial, sans-serif; font-size:16px; line-height:1.6;
+
+    z-index:1000;">
+
+
+
+            <strong style="font-size:18px;">Study Aim:</strong><br>
+
+            To investigate how urban heat varies across Melbourne City and identify patterns
+
+            of Land Surface Temperature (LST) linked to the built environment.<br><br>
+
+
+
+            <strong style="font-size:18px;">Study Objective:</strong><br>
+
+            <ol style="margin:5px 0 0 20px; padding:0;">
+
+                <li>To visualize spatial variations in Land Surface Temperature (LST) across Melbourne City.</li>
+
+                <li>To examine how LST relates to urban land use patterns.</li>
+
+                <li>To assess the role of vegetation cover in moderating urban heat.</li>
+
+                <li>To analyze the influence of infrastructure on heat distribution.</li>
+
+            </ol>
+
+        </div>
+
+        <!-- Global place search (Photon/OSM) -->
+
+        <div id="photonBox" style="
+
+            position:absolute; top:140px; left:10px; z-index:1000;
+
+            background:#fff; border:1px solid #ccc; padding:8px 10px; width:260px;
+
+            font-family:Arial, sans-serif; font-size:13px;">
+
+            <strong>Search places (OSM)</strong>
+
+            <input id="photonInput" type="text" placeholder="Type a place…"
+                           style="width:100%; padding:4px; margin-top:5px; border:1px solid #aaa;">
+
+            <div id="photonResults" style="max-height:220px; overflow:auto; display:none; margin-top:4px;"></div>
+
+        </div>
+
+        <div id="map">
+            <div id="popup" class="ol-popup">
+                <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+                <div id="popup-content"></div>
+            </div>
+        </div>
+        <script src="resources/qgis2web_expressions.js"></script>
+        <script src="./resources/functions.js"></script>
+        <script src="./resources/ol.js"></script>
+        <script src="resources/horsey.min.js"></script>
+        <script src="resources/ol-search-layer.js"></script>
+        <script src="./resources/ol-layerswitcher.js"></script>
+        <script src="resources/photon-geocoder-autocomplete.min.js"></script>
+        <script src="layers/Melbourne_City_LST_1.js"></script>
+        <script src="styles/Melbourne_City_LST_1_style.js"></script>
+        <script src="./layers/layers.js" type="text/javascript"></script>
+        <script src="./resources/Autolinker.min.js"></script>
+        <script src="./resources/qgis2web.js"></script>
+
+        <script>
+            (function () {
+                const box = document.getElementById('photonBox');
+                const input = document.getElementById('photonInput');
+                const results = document.getElementById('photonResults');
+
+                async function searchPhoton(q) {
+                    if (!q || q.trim().length < 3) {
+                        results.style.display = 'none'; results.innerHTML = '; return; }
+                        const url = 'https://photon.komoot.io/api/?q=$(encodeURIComponent(q))&limit=8';
+                        const resp = await fetch(url);
+                        const data = await.resp.json();
+                        const feats = (data && data.features) || [];
+                        results.style.display = feats.length ? 'block' : 'none';
+                        results.innerHTML = feats.map((f, i) =>
+                            '<div class="photon-item" style="padding:6px; border:1px solid #eee; cursor:pointer;">
+            $(f.properties.name || '(no name)')[] $(f.properties.city || f.properties.state || f.properties.country ||' </div>').join('');
+                        Array.from(results.querySelectorAll('./photon-item')).forEach((el, i) => {
+                            el.onclick = () => {
+                                const f = feats[i];
+                                if (window.map && window.ol) {
+                                    const [lon, lat] = f.geometry.coordinates; // Point or first coordinate
+                                    const coord = ol.proj.fromLonLat([lon, lat]);
+                                    map.getView().animate((center: coord, zoom: 14, duration: 300));
+                                }
+                                results.style.display = 'none';
+                            });
+                    });
+                }
+
+                let t = null;
+                input.addEventListener('input', () => {
+                    clearTimeout(t);
+                    t = setTimeout(() => searchPhoton(input.value), 250); // debounce
+                });
+            });
+        </script>
+
+  
+
+        <div id="credits" style="position:absolute; bottom:5px; left:50%;
+
+     transform:translateX(-50%); background:#fff; padding:4px 8px;
+
+     font-size:12px; border:1px solid #ccc; z-index:1000;">
+
+            Map created by Shinjita Das (RMIT University) | Data: Landsat8 (USGS/NASA),
+
+            ABS 2021 Census | Basemap © OpenStreetMap contributors (CC-BY-SA) | Exported with QGIS/qgis2web
+
+        </div>
+
+
+    </body>
+</html>
