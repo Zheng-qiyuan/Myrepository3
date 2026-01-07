@@ -133,7 +133,24 @@
                 <div id="popup-content"></div>
             </div>
         </div>
-        
+
+
+        <div id="opacity-control" style="
+        position: absolute; 
+        bottom: 40px; 
+        left: 10px; 
+        z-index: 1000; 
+        background: white; 
+        padding: 10px; 
+        border: 1px solid #ccc; 
+        border-radius: 5px;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.2);">
+    
+        <label>LST Layer Opacity:</label><br>
+        <input id="opacityRange" type="range" min="0" max="1" step="0.1" value="0.7" style="width: 150px;">
+        </div>
          
         <script src="resources/qgis2web_expressions.js"></script>
         <script src="./resources/functions.js"></script>
@@ -191,57 +208,6 @@ f.properties.country || ''}
             }); 
             })();
 
-
-            // 专门设置Melbourne_City_LST图层透明度的代码
-            function setLSTTransparency() {
-                // 等待地图完全加载
-                if (typeof map !== 'undefined') {
-                    // 方法1：尝试通过图层名称查找
-                    var layers = map.getLayers();
-                    var found = false;
-                    
-                    layers.forEach(function(layer, index) {
-                        // 获取图层名称
-                        var layerName = layer.get('name') || layer.get('title') || '';
-                        
-                        // 检查是否包含"Melbourne_City_LST"
-                        if (layerName.indexOf('Melbourne_City_LST') !== -1 || layerName.indexOf('LST') !== -1) {
-                            // 设置透明度为0.5（50%透明）
-                            layer.setOpacity(0.2);
-                            console.log('找到Melbourne_City_LST图层，透明度设置为0.5（50%透明）');
-                            found = true;
-                        }
-                    });
-                    
-                    // 方法2：如果没找到，尝试查找第二个图层（通常底图是第一个，LST是第二个）
-                    if (!found && layers.getLength() > 1) {
-                        var secondLayer = layers.item(1);
-                        secondLayer.setOpacity(0.2);
-                        console.log('将第二个图层（推测为LST）透明度设置为0.5（50%透明）');
-                    }
-                    
-                    if (!found && layers.getLength() <= 1) {
-                        console.log('未找到LST图层，可能需要等待地图完全加载');
-                        setTimeout(setLSTTransparency, 500);
-                    }
-                } else {
-                    console.log('地图对象未定义，等待地图加载...');
-                    setTimeout(setLSTTransparency, 500);
-                }
-            }
-            
-            // 页面加载完成后开始设置透明度
-            document.addEventListener('DOMContentLoaded', function() {
-                // 给地图一些时间加载
-                setTimeout(setLSTTransparency, 1500);
-            });
-            
-            // 如果地图已经加载了load事件，也尝试设置
-            if (typeof map !== 'undefined') {
-                map.on('load', function() {
-                    setTimeout(setLSTTransparency, 1000);
-                });
-            }
         </script>
 
   
@@ -258,9 +224,30 @@ f.properties.country || ''}
 
         </div>
 
+        <script>
+    // 监听滑块的拖动事件
+    var opacityInput = document.getElementById('opacityRange');
+    
+    opacityInput.addEventListener('input', function() {
+        var value = parseFloat(this.value);
+        
+        // 尝试设置透明度
+        if (typeof lyr_Melbourne_City_LST_1 !== 'undefined') {
+            lyr_Melbourne_City_LST_1.setOpacity(value);
+        }
+    });
+
+    // 初始化：页面加载时先设置一次默认透明度
+    window.addEventListener('load', function() {
+         if (typeof lyr_Melbourne_City_LST_1 !== 'undefined') {
+            lyr_Melbourne_City_LST_1.setOpacity(0.7); // 对应滑块的默认值
+         }
+    });
+</script>
 
     </body>
 </html>
+
 
 
 
