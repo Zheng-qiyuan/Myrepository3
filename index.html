@@ -134,103 +134,7 @@
             </div>
         </div>
         
-         <!-- 添加的代码：设置底图和LST图层透明 -->
-        <script>
-            // 等待地图完全加载后调整图层透明度
-            function setLayersTransparency() {
-                // 确保地图对象已存在
-                if (typeof map !== 'undefined') {
-                    // 获取所有图层
-                    var layers = map.getLayers();
-                    console.log('地图图层数量:', layers.getLength());
-                    
-                    // 遍历所有图层并设置透明度
-                    layers.forEach(function(layer, index) {
-                        // 获取图层名称（如果存在）
-                        var layerName = layer.get('name') || layer.get('title') || '';
-                        console.log('图层', index, '名称:', layerName);
-                        
-                        // 设置底图透明度（假设底图是第一个图层）
-                        if (index === 0) {
-                            layer.setOpacity(0.5); // 底图50%透明
-                            console.log('底图透明度已设置为50%');
-                        }
-                        
-                        // 设置Melbourne_City_LST图层透明度
-                        // 通过图层名称查找，名称可能包含"Melbourne_City_LST"
-                        if (layerName && (layerName.indexOf('Melbourne_City_LST') !== -1 || 
-                                          layerName.indexOf('LST') !== -1)) {
-                            layer.setOpacity(0.7); // LST图层70%透明（30%透明度）
-                            console.log('Melbourne_City_LST图层透明度已设置为70%');
-                        }
-                    });
-                    
-                    // 如果上述方法没找到LST图层，尝试通过图层索引设置
-                    // 通常底图是第一个，LST图层是第二个
-                    if (layers.getLength() > 1) {
-                        var lstLayer = layers.item(1);
-                        var lstLayerName = lstLayer.get('name') || lstLayer.get('title') || '';
-                        console.log('第二个图层名称:', lstLayerName);
-                        
-                        // 如果第二个图层看起来像LST图层，设置透明度
-                        if (lstLayerName.indexOf('LST') === -1) {
-                            // 可能是LST图层，设置透明度
-                            lstLayer.setOpacity(0.7);
-                            console.log('第二个图层（可能是LST）透明度已设置为70%');
-                        }
-                    }
-                } else {
-                    console.log('地图对象未定义，等待地图加载...');
-                    // 如果地图还未加载，稍后重试
-                    setTimeout(setLayersTransparency, 500);
-                }
-            }
-
-            // 监听地图加载完成事件
-            document.addEventListener('DOMContentLoaded', function() {
-                // 给地图一点时间初始化
-                setTimeout(setLayersTransparency, 1500);
-            });
-
-            // 如果地图是通过异步加载的，也可以监听地图的load事件
-            if (typeof map !== 'undefined') {
-                map.on('load', function() {
-                    setTimeout(setLayersTransparency, 1000);
-                });
-            }
-            
-            // 另一种方法：直接修改图层样式（适用于qgis2web生成的地图）
-            // 因为qgis2web可能会用特定方式存储图层，我们也可以尝试直接修改样式
-            function setLSTLayerTransparencyAlternative() {
-                // 等待一小段时间确保地图完全加载
-                setTimeout(function() {
-                    // 尝试通过图层ID查找
-                    var lstLayerElements = document.querySelectorAll('.ol-layer');
-                    lstLayerElements.forEach(function(element, index) {
-                        // 检查元素是否包含LST相关文本（通过样式类名或ID）
-                        var className = element.className || '';
-                        var id = element.id || '';
-                        
-                        if (className.indexOf('lst') !== -1 || id.indexOf('lst') !== -1 || 
-                            className.indexOf('LST') !== -1 || id.indexOf('LST') !== -1) {
-                            // 直接修改Canvas元素的透明度
-                            var canvas = element.querySelector('canvas');
-                            if (canvas) {
-                                canvas.style.opacity = 0.7;
-                                console.log('通过DOM找到LST图层并设置透明度为70%');
-                            }
-                        }
-                    });
-                }, 2000);
-            }
-            
-            // 同时尝试两种方法
-            document.addEventListener('DOMContentLoaded', function() {
-                setLSTLayerTransparencyAlternative();
-            });
-        </script>
-
-        
+         
         <script src="resources/qgis2web_expressions.js"></script>
         <script src="./resources/functions.js"></script>
         <script src="./resources/ol.js"></script>
@@ -286,6 +190,58 @@ f.properties.country || ''}
                 t = setTimeout(() => searchPhoton(input.value), 250); // debounce 
             }); 
             })();
+
+
+            // 专门设置Melbourne_City_LST图层透明度的代码
+            function setLSTTransparency() {
+                // 等待地图完全加载
+                if (typeof map !== 'undefined') {
+                    // 方法1：尝试通过图层名称查找
+                    var layers = map.getLayers();
+                    var found = false;
+                    
+                    layers.forEach(function(layer, index) {
+                        // 获取图层名称
+                        var layerName = layer.get('name') || layer.get('title') || '';
+                        
+                        // 检查是否包含"Melbourne_City_LST"
+                        if (layerName.indexOf('Melbourne_City_LST') !== -1 || layerName.indexOf('LST') !== -1) {
+                            // 设置透明度为0.5（50%透明）
+                            layer.setOpacity(0.5);
+                            console.log('找到Melbourne_City_LST图层，透明度设置为0.5（50%透明）');
+                            found = true;
+                        }
+                    });
+                    
+                    // 方法2：如果没找到，尝试查找第二个图层（通常底图是第一个，LST是第二个）
+                    if (!found && layers.getLength() > 1) {
+                        var secondLayer = layers.item(1);
+                        secondLayer.setOpacity(0.5);
+                        console.log('将第二个图层（推测为LST）透明度设置为0.5（50%透明）');
+                    }
+                    
+                    if (!found && layers.getLength() <= 1) {
+                        console.log('未找到LST图层，可能需要等待地图完全加载');
+                        setTimeout(setLSTTransparency, 500);
+                    }
+                } else {
+                    console.log('地图对象未定义，等待地图加载...');
+                    setTimeout(setLSTTransparency, 500);
+                }
+            }
+            
+            // 页面加载完成后开始设置透明度
+            document.addEventListener('DOMContentLoaded', function() {
+                // 给地图一些时间加载
+                setTimeout(setLSTTransparency, 1500);
+            });
+            
+            // 如果地图已经加载了load事件，也尝试设置
+            if (typeof map !== 'undefined') {
+                map.on('load', function() {
+                    setTimeout(setLSTTransparency, 1000);
+                });
+            }
         </script>
 
   
@@ -305,6 +261,7 @@ f.properties.country || ''}
 
     </body>
 </html>
+
 
 
 
