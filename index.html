@@ -207,7 +207,7 @@ f.properties.country || ''}
                         // 检查是否包含"Melbourne_City_LST"
                         if (layerName.indexOf('Melbourne_City_LST') !== -1 || layerName.indexOf('LST') !== -1) {
                             // 设置透明度为0.5（50%透明）
-                            layer.setOpacity(0.5);
+                            layer.setOpacity(0.2);
                             console.log('找到Melbourne_City_LST图层，透明度设置为0.5（50%透明）');
                             found = true;
                         }
@@ -216,7 +216,7 @@ f.properties.country || ''}
                     // 方法2：如果没找到，尝试查找第二个图层（通常底图是第一个，LST是第二个）
                     if (!found && layers.getLength() > 1) {
                         var secondLayer = layers.item(1);
-                        secondLayer.setOpacity(0.5);
+                        secondLayer.setOpacity(0.2);
                         console.log('将第二个图层（推测为LST）透明度设置为0.5（50%透明）');
                     }
                     
@@ -261,6 +261,7 @@ f.properties.country || ''}
 
     </body>
 </html>
+
 
 
 
