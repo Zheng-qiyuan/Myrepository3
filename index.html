@@ -133,6 +133,49 @@
                 <div id="popup-content"></div>
             </div>
         </div>
+        
+        <!-- 添加的代码：设置底图透明 -->
+        <script>
+            // 等待地图完全加载后调整底图透明度
+            function setBasemapTransparency() {
+                // 确保地图对象已存在
+                if (typeof map !== 'undefined') {
+                    // 获取所有图层
+                    var layers = map.getLayers();
+                    // 假设底图是第一个图层（通常是qgis2web中添加的第一个图层）
+                    var basemapLayer = layers.item(0);
+                    
+                    // 设置底图透明度（0 = 完全透明，1 = 完全不透明）
+                    // 这里设置为0.5，你可以根据需要调整
+                    if (basemapLayer) {
+                        basemapLayer.setOpacity(0.5);
+                        console.log('底图透明度已设置为50%');
+                    } else {
+                        console.log('未找到底图图层');
+                    }
+                } else {
+                    console.log('地图对象未定义，等待地图加载...');
+                    // 如果地图还未加载，稍后重试
+                    setTimeout(setBasemapTransparency, 500);
+                }
+            }
+
+            // 监听地图加载完成事件
+            document.addEventListener('DOMContentLoaded', function() {
+                // 给地图一点时间初始化
+                setTimeout(setBasemapTransparency, 1000);
+            });
+
+            // 如果地图是通过异步加载的，也可以监听地图的load事件
+            if (typeof map !== 'undefined') {
+                map.on('load', function() {
+                    setTimeout(setBasemapTransparency, 500);
+                });
+            }
+        </script>
+
+
+        
         <script src="resources/qgis2web_expressions.js"></script>
         <script src="./resources/functions.js"></script>
         <script src="./resources/ol.js"></script>
@@ -207,4 +250,5 @@ f.properties.country || ''}
 
     </body>
 </html>
+
 
