@@ -35,7 +35,7 @@
             background-color: rgba(255,255,255,.4) !important;
             padding: 2px !important;
         } 
-        /* 强制滑块鼠标指针样式 */
+        /* 滑块指针样式 */
         #opacity-control input[type=range] {
             cursor: pointer;
         }
@@ -57,9 +57,7 @@
        background-color:white; padding:10px 15px; border:1px solid #ccc;
        font-family: Arial, sans-serif; font-size:28px; font-weight:bold;
        text-align:center; z-index:1000; display:flex; align-items:center; gap:10px;">
-
             <img src="images/logo.png" alt="University Logo" width="100" height="50">
-
             Mapping Land Surface Temperature in Melbourne City
         </h2>
 
@@ -142,8 +140,8 @@
                         results.style.display = 'none'; results.innerHTML = '';
                         return;
                     }
+                    // 这里原代码可能有外部API调用，保留原样
                     const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=8`;
-                  
                     const resp = await fetch(url);
                     const data = await resp.json();
                     const feats = (data && data.features) || [];
@@ -174,35 +172,18 @@
         </script>
 
         <script>
+            // 确保页面加载完后再执行，避免找不到元素或图层
             window.addEventListener('load', function() {
+                // 1. 获取滑块元素
                 var opacityInput = document.getElementById('opacityRange');
-                var targetLayer = null;
+                
+                // 2. 直接对图层设置初始透明度 (0.7)
+                lyr_Melbourne_City_LST_1.setOpacity(parseFloat(opacityInput.value));
 
-                // 尝试查找图层变量，增加了一些容错判断
-                if (typeof lyr_Melbourne_City_LST_1 !== 'undefined') {
-                    targetLayer = lyr_Melbourne_City_LST_1;
-                    console.log("Success: LST layer found (lyr_Melbourne_City_LST_1).");
-                } 
-                // 备用：万一变量名没有_1后缀
-                else if (typeof lyr_Melbourne_City_LST !== 'undefined') {
-                    targetLayer = lyr_Melbourne_City_LST;
-                    console.log("Success: LST layer found (lyr_Melbourne_City_LST).");
-                }
-                else {
-                    console.error("Error: Could not find any LST layer variable. Please check layers/layers.js.");
-                    alert("注意：未能自动找到LST图层，透明度滑块可能无法工作。请检查浏览器的F12控制台。");
-                }
-
-                if (targetLayer) {
-                    // 1. 初始化
-                    targetLayer.setOpacity(parseFloat(opacityInput.value));
-
-                    // 2. 监听拖动
-                    opacityInput.addEventListener('input', function() {
-                        var val = parseFloat(this.value);
-                        targetLayer.setOpacity(val);
-                    });
-                }
+                // 3. 监听滑块拖动，实时更新透明度
+                opacityInput.addEventListener('input', function() {
+                    lyr_Melbourne_City_LST_1.setOpacity(parseFloat(this.value));
+                });
             });
         </script>
         <div id="credits" style="position:absolute; bottom:5px; left:50%;
